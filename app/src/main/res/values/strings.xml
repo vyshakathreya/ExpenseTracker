@@ -1,0 +1,75 @@
+<resources>
+    <string name="app_name">Personal Expense Tracker</string>
+
+    <string name="NickName">Nick name</string>
+    <string name="country">Country</string>
+    <string name="state">State</string>
+    <string name="city">City</string>
+    <string name="year">Year</string>
+    <string name="save">Save</string>
+    <string name="latitude">Latitude</string>
+    <string name="locate_on_the_map">Locate on the map</string>
+    <string name="longitude">Longitude</string>
+    <string name="find_friends_by_country_state_city_or_year_at_sdsu">Find friends by country, state or year at SDSU</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="password">Password</string>
+
+    <!-- Strings related to login -->
+    <string name="app_title_text">Personal Expense Tracker</string>
+    <string name="logged_user">Hi, %1$s</string>
+    <string name="sign_in">Sign In</string>
+    <string name="create_account">Create Account</string>
+    <string name="signed_out">Plese Sign in</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="auth_failed">Authentication failed</string>
+    <string name="account_fail">Account not created</string>
+    <string name="logout">Log Out</string>
+    <string name="auth_success">Account Created</string>
+    <string name="clear">Reset</string>
+    <string name="findlist">List View</string>
+    <string name="findmap">Maps View</string>
+    <string name="load_more">Refresh</string>
+    <string name="OK">Ok</string>
+    <string name="cancel">Cancel</string>
+    <string name="input">Input</string>
+    <string name="title_activity_chat">ChatActivity</string>
+    <string name="message_sender">message_sender</string>
+    <string name="sender">sender</string>
+    <string name="users_available_for_chat">Users Available For Chat</string>
+    <string name="name">Name</string>
+    <string name="userName">User Name</string>
+    <string name="currency">Currency</string>
+    <string name="myProfile">My Profile</string>
+    <string name="phone">Phone Number</string>
+    <string name="title_activity_summary_list">Accounts Summary</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="addAlert">Set Alerts</string>
+    <string name="addShopList">Shopping List</string>
+    <string name="enableNetwork">No Internet</string>
+    <string name="textview">Sample Text</string>
+    <string name="account_nickname">Account Nick Name</string>
+    <string name="add_account">Add Account</string>
+    <string name="ok">OK</string>
+    <string name="select_account">---Select Account---</string>
+    <string name="addPaymentMethod">Add New Account</string>
+    <string name="new_account">New Account</string>
+    <string name="bank_name">Bank Name</string>
+    <string name="nick_name_or_bank_name">nick name or bank name</string>
+    <string name="account_type">Account Type</string>
+    <string name="expenseDetails">Description</string>
+    <string name="enterAnExpense">Enter An Expense</string>
+    <string name="category">Category</string>
+    <string name="accountUsed">Mode of Payment</string>
+    <string name="logExpense">Log Expense</string>
+    <string name="amountSpent">0.00</string>
+    <string name="remember_Me">Remember Me</string>
+    <string name="show_password">Show Password</string>
+    <string name="date">date</string>
+    <string name="desc">description</string>
+    <string name="type">Cr/De</string>
+    <string name="amount">amount</string>
+
+</resources>

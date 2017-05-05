@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "767161038268",
+    "firebase_url": "https://personalexpensetracker-b8f96.firebaseio.com",
+    "project_id": "personalexpensetracker-b8f96",
+    "storage_bucket": "personalexpensetracker-b8f96.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:767161038268:android:3bbbecd32861ce35",
+        "android_client_info": {
+          "package_name": "edu.sdsu.vyshak.personalexpensetracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "767161038268-59hggkufhjcl0c6nkktpboc2dc31oi9k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "edu.sdsu.vyshak.personalexpensetracker",
+            "certificate_hash": "789706880cb438714822d04597dca35de67ca585"
+          }
+        },
+        {
+          "client_id": "767161038268-lhc53fauta7ad7n57ja9j7qs3jrbt4g7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnI6yADl5CB-UCuM8Hl-W9PY-xYI7sCSg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "767161038268-lhc53fauta7ad7n57ja9j7qs3jrbt4g7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
