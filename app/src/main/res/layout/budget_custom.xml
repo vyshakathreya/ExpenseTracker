@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/budgetname"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.61"
+        android:text="@string/textview" />
+
+    <TextView
+        android:id="@+id/budgetamount"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.61"
+        android:text="@string/textview" />
+
+    <TextView
+        android:id="@+id/budgetfreq"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.61"
+        android:text="@string/textview" />
+
+    <ImageButton
+        android:id="@+id/budgetsClose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.10"
+        android:background="@color/common_google_signin_btn_text_dark_default"
+        app:srcCompat="@android:drawable/ic_menu_close_clear_cancel"
+        android:contentDescription=""
+        tools:ignore="ContentDescription" />
+
+</LinearLayout>

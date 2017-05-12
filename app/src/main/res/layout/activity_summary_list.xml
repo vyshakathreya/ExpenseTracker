@@ -25,13 +25,7 @@
 
         </android.support.v7.widget.Toolbar>
 
-        <TextView
-            android:id="@+id/loggedUser"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="24sp"
-            android:visibility="gone" />
+
 
         <android.support.design.widget.TabLayout
             android:id="@+id/tabs"
@@ -48,63 +42,5 @@
 
     </android.support.v4.view.ViewPager>
 
-    <FrameLayout
-        android:id="@+id/content2"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    </FrameLayout>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/addAccount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:clickable="true"
-        android:foregroundGravity="top|right"
-        android:visibility="gone"
-        app:backgroundTint="@android:color/holo_blue_dark"
-        app:elevation="6dp"
-        app:fabSize="normal"
-        app:layout_anchor="@+id/addExpense"
-        app:layout_anchorGravity="top"
-        app:pressedTranslationZ="12dp"
-        app:rippleColor="@android:color/holo_green_light"
-        app:srcCompat="@drawable/ic_credit_card_black_24px"
-        tools:rippleColor="@android:color/holo_green_light" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/addExpense"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:layout_marginEnd="0dp"
-        android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="0dp"
-        android:clickable="true"
-        android:visibility="gone"
-        app:backgroundTint="?attr/actionModeSplitBackground"
-        app:elevation="6dp"
-        app:fabSize="normal"
-        app:layout_anchor="@+id/fab"
-        app:layout_anchorGravity="top"
-        app:pressedTranslationZ="12dp"
-        app:srcCompat="@android:drawable/ic_menu_edit" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|right"
-        android:layout_margin="@dimen/fab_margin"
-        app:backgroundTint="?android:attr/textColorLink"
-        app:fabSize="normal"
-        app:elevation="6dp"
-        app:pressedTranslationZ="12dp"
-        app:layout_anchor="@+id/container"
-        app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@android:drawable/ic_menu_add" />
 
 </android.support.design.widget.CoordinatorLayout>

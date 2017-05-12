@@ -31,6 +31,7 @@
         android:id="@+id/login_form"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/colorAccent"
         android:gravity="center_horizontal"
         android:orientation="vertical"
         android:paddingBottom="20dp">
@@ -40,22 +41,23 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:text="@string/app_title_text"
+            android:textSize="30sp"
             android:theme="@style/ThemeOverlay.MyTitleText" />
 
         <TextView
             android:id="@+id/status"
-            android:gravity="center"
-            android:layout_height="match_parent"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
             android:text="@string/signed_out" />
 
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="387dp"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:background="@color/grey_300"
+        android:background="@color/colorFAB2"
         android:foregroundGravity="center_vertical|center"
         android:gravity="center_vertical"
         android:orientation="vertical">
@@ -64,13 +66,13 @@
             android:id="@+id/email_password_fields"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_gravity="center_vertical|center_horizontal"
             android:foregroundGravity="center_horizontal"
             android:gravity="center_vertical|center"
             android:orientation="vertical"
-            android:paddingTop="16dp"
             android:paddingLeft="16dp"
-            android:paddingRight="16dp">
+            android:paddingRight="16dp"
+            android:paddingTop="16dp">
 
             <EditText
                 android:id="@+id/field_email"
@@ -78,7 +80,14 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical|center_horizontal"
                 android:hint="@string/hint_email"
-                android:inputType="textAutoComplete|textEmailAddress|textWebEmailAddress" />
+                android:inputType="textAutoComplete|textEmailAddress|textWebEmailAddress"
+                android:padding="10dp"
+                android:paddingBottom="10dp"
+                android:paddingEnd="10dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingStart="10dp"
+                android:paddingTop="10dp" />
 
             <EditText
                 android:id="@+id/field_password"
@@ -86,50 +95,28 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|center_horizontal"
                 android:hint="@string/hint_password"
-                android:inputType="textPassword" />
+                android:inputType="textPassword"
+                android:padding="10dp"
+                android:paddingBottom="10dp"
+                android:paddingEnd="10dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingStart="10dp"
+                android:paddingTop="10dp" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <CheckBox
-                    android:id="@+id/showPassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/show_password" />
-
-                <CheckBox
-                    android:id="@+id/rememberMe"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/remember_Me" />
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/email_password_buttons"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical|center"
-            android:orientation="horizontal"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp">
 
             <Button
                 android:id="@+id/email_sign_in_button"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="start"
                 android:text="@string/sign_in"
                 android:theme="@style/ThemeOverlay.MyDarkButton"
                 tools:ignore="ButtonStyle" />
 
             <Button
                 android:id="@+id/email_create_account_button"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/create_account"
                 android:theme="@style/ThemeOverlay.MyDarkButton"

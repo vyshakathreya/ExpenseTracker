@@ -7,8 +7,25 @@ import android.os.Parcelable;
  */
 
 class Expenses  {
-    String account,  currency, transtype, category, date, desc;
-    int amount;
+    String account;
+    String userId;
+    float amount;
+    String currency;
+    String transtype;
+    String category;
+    String date;
+    String desc;
+    String time;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+
 
     public String getAccount() {
         return account;
@@ -58,12 +75,19 @@ class Expenses  {
         this.desc = desc;
     }
 
-    public int getAmount() {
+    public float getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(float amount) {
         this.amount = amount;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+    public String getTime(){
+        return time;
     }
 }
 

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/nav_accountSummary"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="@string/accounts_summary" />
+        <item
+            android:id="@+id/nav_addAccount"
+            android:icon="@drawable/ic_credit_card_black_24px"
+            android:title="@string/add_account" />
+        <item
+            android:id="@+id/nav_manageAccounts"
+            android:icon="@drawable/ic_delete_black_24px"
+            android:title="@string/manage_accounts" />
+
+        <item
+            android:id="@+id/nav_addExpense"
+            android:icon="@drawable/ic_border_color_black_24px"
+            android:orderInCategory="100"
+            android:title="@string/add_Expense" />
+
+        <item
+            android:id="@+id/graphical"
+            android:icon="@drawable/ic_assessment_black_24px"
+            android:orderInCategory="100"
+            android:title="@string/statistics" />
+
+        <item
+            android:id="@+id/shopList"
+            android:icon="@drawable/ic_shopping_cart_black_24px"
+            android:orderInCategory="100"
+            android:title="@string/addShopList"/>
+
+        <item
+            android:id="@+id/alertMe"
+            android:icon="@drawable/ic_add_alert_black_24px"
+            android:orderInCategory="100"
+            android:title="@string/addAlert" />
+
+        <item
+            android:id="@+id/setBudget"
+            android:icon="@drawable/ic_assignment_black_24px"
+            android:orderInCategory="100"
+            android:title="@string/set_budget" />
+
+        <item
+            android:id="@+id/nav_retriveData"
+            android:icon="@drawable/ic_restore_black_24px"
+            android:orderInCategory="100"
+            android:title="@string/restore_data" />
+
+        <item
+            android:id="@+id/logout"
+            android:orderInCategory="100"
+            android:title="@string/logout"
+            android:icon="@drawable/ic_power_settings_new_black_24px"/>
+
+    </group>
+
+</menu>

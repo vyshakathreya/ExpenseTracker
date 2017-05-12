@@ -21,12 +21,13 @@
             tools:ignore="UselessParent">
 
             <ProgressBar
+                android:id="@+id/formprogress"
                 style="?android:attr/progressBarStyleLarge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="8dp"
-                android:visibility="gone"
-                android:id="@+id/formprogress"/>
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -84,16 +85,16 @@
                 android:textAlignment="center"/>
 
             <EditText
+                android:id="@+id/phone"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:inputType="number"
+                android:layout_marginTop="10dp"
                 android:ems="10"
-                android:id="@+id/phone"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:inputType="number|phone"
                 android:nextFocusForward="@+id/password"
-                android:layout_marginTop="10dp"
-                tools:ignore="LabelFor" />
+                tools:ignore="LabelFor,TextFields" />
 
             <TextView
                 android:text="@string/password"
@@ -140,7 +141,7 @@
 
                 <Button
                     android:id="@+id/submit"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:layout_marginTop="10dp"

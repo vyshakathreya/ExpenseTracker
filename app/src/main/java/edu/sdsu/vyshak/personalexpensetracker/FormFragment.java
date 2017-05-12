@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.util.Log;
@@ -34,8 +35,13 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
@@ -106,7 +112,7 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    getActivity().finish();
+                   // getActivity().finish();
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -129,7 +135,7 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
         if(!haveNetworkAccess()){
             Toast.makeText(getActivity(),"Please enable network access",Toast.LENGTH_LONG);
         }
-        progressView = formView.findViewById(R.id.login_progress);
+        progressView = formView.findViewById(R.id.formprogress);
         Calendar cal = Calendar.getInstance();
         emailField = (EditText) formView.findViewById(R.id.email);
         phoneField = (EditText) formView.findViewById(R.id.phone);
@@ -138,9 +144,16 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
         spinnerCurrency = (Spinner) formView.findViewById(R.id.spinner_currency);
         spinnerCurrency.setOnItemSelectedListener(this);
         currencies = new ArrayList<>();
-        currencies.add("USD");
-        currencies.add("INR");
-        currencies.add("GBP");
+        try {
+            InputStream currenciesFile = getActivity().getAssets().open("currencyTypes");
+            BufferedReader in = new BufferedReader( new InputStreamReader(currenciesFile));
+            String line;
+            while((line = in.readLine()) != null){
+                currencies.add(line);
+            }
+        } catch (IOException e) {
+            Log.e("rew", "read Error", e);
+        }
         ArrayAdapter<String> currencyAdapter = new ArrayAdapter<String>(this.getContext(),android.R.layout.simple_list_item_1,currencies);
         spinnerCurrency.setAdapter(currencyAdapter);
         final Button submit = (Button) formView.findViewById(R.id.submit);
@@ -185,14 +198,7 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
                 }
                 else Toast.makeText(getActivity(), "Please correct errors and try again",
                         Toast.LENGTH_LONG).show();
-                /*if(userName.equals(null) || userName.equals(' ')) passwordField.setError("Please choose a nickname");
-                if(phone.equals(null) || phone.equals(' ')) phoneField.setError("Please enter your phone number");
-                if(phone.length()<=10) phoneField.setError("Please correct your phone number");
-                if(email.equals(null)) emailField.setError("Please enter valid email id");
-                if(passwordChosen.equals(null)) passwordField.setError("Please choose a password");
-                if(passwordChosen.length() < 3) passwordField.setError("Password should be a minimum of 3 characters");
 
-                */
             }
         });
         return formView;
@@ -216,15 +222,13 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        /*if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        }*/
+
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-       // mListener = null;
+
     }
 
     /**
@@ -254,7 +258,7 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
     }
 
     public void postData() {
-        //showProgress(true);
+        showProgress(true);
         auth.createUserWithEmailAndPassword(email, passwordChosen)
                 .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
                     @Override
@@ -263,14 +267,15 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
                         if (!task.isSuccessful()) {
                             Toast.makeText(getActivity(), R.string.account_fail,
                                     Toast.LENGTH_SHORT).show();
-                            // showProgress(false);
+                            showProgress(false);
+
                         } else {
                             dbRef = FirebaseDatabase.getInstance().getReference();
-                        dbRef.child("users/" + phone).child("email").setValue(email);
-                        dbRef.child("users/" + phone).child("name").setValue(userName);
-                        dbRef.child("users/" + phone).child("phone").setValue(phone);
-                        dbRef.child("users/" + phone).child("currency").setValue(currency);
-                        dbRef.child("users/" + phone).child("uid").setValue(user.getUid()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        dbRef.child("users/" + user.getUid()).child("email").setValue(email);
+                        dbRef.child("users/" + user.getUid()).child("name").setValue(userName);
+                        dbRef.child("users/" + user.getUid()).child("phone").setValue(phone);
+                        dbRef.child("users/" + user.getUid()).child("currency").setValue(currency);
+                        dbRef.child("users/" + user.getUid()).child("uid").setValue(user.getUid()).addOnCompleteListener(new OnCompleteListener<Void>() {
 
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
@@ -283,8 +288,11 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()) {
-                                                        Log.d(TAG, "User profile updated.");
-                                                        // showProgress(false);//getActivity().finish();
+                                                        Snackbar.make(getView(), "User profile Created", Snackbar.LENGTH_LONG)
+                                                                .setAction("Action", null).show();
+                                                        showProgress(false);
+                                                        auth.signOut();
+                                                        getActivity().finish();
                                                     }
                                                 }
                                             });
@@ -324,8 +332,6 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
                 }
             });
         } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
             progressView.setVisibility(show ? View.VISIBLE : View.GONE);
             formView.setVisibility(show ? View.GONE : View.VISIBLE);
         }

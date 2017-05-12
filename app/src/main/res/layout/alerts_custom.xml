@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/done_Alert"
+            android:layout_width="44dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/alertmessage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.61"
+            android:text="@string/textview" />
+
+        <TextView
+            android:id="@+id/alertdate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.61"
+            android:text="@string/textview" />
+
+        <ImageButton
+            android:id="@+id/imageButtonAlertClose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.10"
+            android:background="@color/common_google_signin_btn_text_dark_default"
+            app:srcCompat="@android:drawable/ic_menu_close_clear_cancel"
+            android:contentDescription=""
+            tools:ignore="ContentDescription" />
+
+    </LinearLayout>
+</LinearLayout>

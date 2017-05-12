@@ -79,14 +79,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         statusTextView = (TextView) findViewById(R.id.status);
         emailField = (EditText) findViewById(R.id.field_email);
         passwordField = (EditText) findViewById(R.id.field_password);
-        rememberCheck = (CheckBox) findViewById(R.id.rememberMe);
-        showpasswordCheck = (CheckBox) findViewById(R.id.showPassword);
         loginFormView = findViewById(R.id.login_form);
         progressView = findViewById(R.id.login_progress);
 
         findViewById(R.id.email_sign_in_button).setOnClickListener(this);
         findViewById(R.id.email_create_account_button).setOnClickListener(this);
-        if(rememberCheck.isChecked()){
             SharedPreferences pref = getSharedPreferences(PREFS_NAME,MODE_PRIVATE);
             String username = pref.getString(PREF_USERNAME, null);
             String password = pref.getString(PREF_PASSWORD, null);
@@ -94,23 +91,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 emailField.setText(username);
                 passwordField.setText(password);
             }
-        }
-        if (showpasswordCheck.isChecked()){
-            passwordField.setTransformationMethod(null);
-            passwordField.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-            Log.d(TAG,"password checked");
-        }
-        else{
-            passwordField.setTransformationMethod(new PasswordTransformationMethod());
-            passwordField.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        }
         auth = FirebaseAuth.getInstance();
         authListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                     if (user != null) {
-                    Intent intent = new Intent(LoginActivity.this,SummaryList.class);
+                    Intent intent = new Intent(LoginActivity.this,Home.class);
                     startActivity(intent);
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
@@ -119,14 +106,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 }
             }
         };
-        if(rememberCheck.isChecked()){
+
             getSharedPreferences(PREFS_NAME,MODE_PRIVATE)
                     .edit()
                     .putString(PREF_USERNAME,emailField.getText().toString())
                     .putString(PREF_PASSWORD,passwordField.getText().toString())
                     .commit();
             Log.d(TAG,"saving data");
-        }
+
     }
 
     @Override
@@ -164,7 +151,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
                         if(task.isSuccessful()){
-                            Intent intent = new Intent(LoginActivity.this,SummaryList.class);
+                            Intent intent = new Intent(LoginActivity.this,Home.class);
                             startActivity(intent);
                             showProgress(false);
                         }
@@ -188,18 +175,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         }
                     }
                 });
-    }
-
-    /*private void getBack() {
-        Intent intent = this.getIntent();
-        this.setResult(RESULT_OK,intent);
-        finish();
-    }*/
-
-    public void signOut() {
-        auth = FirebaseAuth.getInstance();
-        auth.signOut();
-        updateUI(null);
     }
 
     private boolean validateForm() {
@@ -226,7 +201,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void updateUI(FirebaseUser user) {
 
         statusTextView.setText(R.string.signed_out);
-        findViewById(R.id.email_password_buttons).setVisibility(View.VISIBLE);
         findViewById(R.id.email_password_fields).setVisibility(View.VISIBLE);
 
     }
@@ -248,14 +222,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         if (i == R.id.email_create_account_button) {
             createAccount();
         } else if (i == R.id.email_sign_in_button) {
-            if(rememberCheck.isChecked()){
+            //if(rememberCheck.isChecked()){
                 getSharedPreferences(PREFS_NAME,MODE_PRIVATE)
                         .edit()
                         .putString(PREF_USERNAME,emailField.getText().toString())
                         .putString(PREF_PASSWORD,passwordField.getText().toString())
                         .commit();
                 Log.d(TAG,"saving data");
-            }
+            //}
             signIn(emailField.getText().toString(), passwordField.getText().toString());
         }
     }
@@ -265,9 +239,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
@@ -296,59 +267,5 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-   /* public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }*/
 }
 

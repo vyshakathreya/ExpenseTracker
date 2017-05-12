@@ -60,6 +60,7 @@
 
         <Button
             android:id="@+id/addAccountButton"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -68,11 +69,11 @@
             android:paddingEnd="10dp"
             android:paddingStart="10dp"
             android:paddingTop="10dp"
-            android:text="@string/add_account"
-            style="?android:attr/buttonStyle"/>
+            android:text="@string/add_account" />
 
         <Button
             android:id="@+id/cancelAddAccountButton"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -81,7 +82,6 @@
             android:paddingEnd="10dp"
             android:paddingStart="10dp"
             android:paddingTop="10dp"
-            style="?android:attr/buttonStyle"
             android:text="@string/cancel" />
     </LinearLayout>
 

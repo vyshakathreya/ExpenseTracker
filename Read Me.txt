@@ -1,0 +1,18 @@
+Personal Expense Tracker is an application which is used to monitor personal expenses. 
+
+Min SDK = 19
+
+Sailent features include:
+1. Set budget limit per week and per month. The system gives a notification if the expense is about to meet the allocated budget. 
+Notification is sent twice. Once when 60% of the budget is reached. Another time when 90% of the budget is reached.
+
+2. A shopping list with option to add expenses upon finishing shopping. Expense will be logged as shopping. Uset can add and remove the items to the
+shopping list. Items that are purchased can be checked.
+
+3. App accomodated 20 popular currencies of the world. User can enter expense in any currency. When the user logs in, he has the option of choosing his 
+home currency. Balance is displayed in both home currency as well as in the default currency which is USD.
+
+4. Balance updates in USD as well as chosen currency.
+
+api used to get currency conversion rates: http://fixer.io/
+external library used for graph from android-graphview.org
