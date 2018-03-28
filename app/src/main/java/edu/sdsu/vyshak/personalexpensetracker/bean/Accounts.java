@@ -1,13 +1,13 @@
-package edu.sdsu.vyshak.personalexpensetracker;
+package edu.sdsu.vyshak.personalexpensetracker.bean;
 
 /**
- * Created by vysha on 5/6/2017.
+ * Created by Vyshak on 5/6/2017.
+ * This class represents the parameters for the user accounts.
  */
 
-class Accounts {
-    String accountName;
-    String accountType;
-
+public class Accounts {
+    private String accountName;
+    private String accountType;
 
     public String getAccountName() {
         return accountName;
@@ -24,6 +24,5 @@ class Accounts {
     public void setAccountType(String accountType) {
         this.accountType = accountType;
     }
-
 
 }

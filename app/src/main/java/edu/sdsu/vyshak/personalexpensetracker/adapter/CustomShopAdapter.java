@@ -1,4 +1,4 @@
-package edu.sdsu.vyshak.personalexpensetracker;
+package edu.sdsu.vyshak.personalexpensetracker.adapter;
 
 import android.content.Context;
 import android.graphics.Paint;
@@ -9,12 +9,15 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import edu.sdsu.vyshak.personalexpensetracker.data.DBHelper;
+import edu.sdsu.vyshak.personalexpensetracker.R;
+import edu.sdsu.vyshak.personalexpensetracker.bean.ShopItems;
+
 /**
- * Created by vysha on 5/6/2017.
+ * Created by Vyshak on 5/6/2017.
  */
 
 public class CustomShopAdapter extends ArrayAdapter<ShopItems> {

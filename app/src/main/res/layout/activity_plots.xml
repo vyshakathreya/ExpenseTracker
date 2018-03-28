@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="edu.sdsu.vyshak.personalexpensetracker.PlotsActivity">
+    tools:context="edu.sdsu.vyshak.personalexpensetracker.activity.PlotsActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"

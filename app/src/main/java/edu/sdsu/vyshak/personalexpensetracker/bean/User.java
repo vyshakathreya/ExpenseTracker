@@ -1,10 +1,11 @@
-package edu.sdsu.vyshak.personalexpensetracker;
+package edu.sdsu.vyshak.personalexpensetracker.bean;
 
 /**
- * Created by vysha on 5/8/2017.
+ * Created by Vyshak on 5/8/2017.
+ * This class has the parameters associated with the user.
  */
 
-class User {
+public class User {
     String uid;
     String currency;
 

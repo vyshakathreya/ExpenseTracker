@@ -1,10 +1,11 @@
-package edu.sdsu.vyshak.personalexpensetracker;
+package edu.sdsu.vyshak.personalexpensetracker.bean;
 
 /**
- * Created by vysha on 5/9/2017.
+ * Created by Vyshak on 5/9/2017.
+ * The display name is to identify the current user.
  */
 
-class Disp {
+public class Display {
     private String displayname;
 
     public String getDisplayname() {

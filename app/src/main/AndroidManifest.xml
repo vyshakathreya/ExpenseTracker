@@ -18,7 +18,7 @@
         android:windowSoftInputMode="adjustResize|adjustPan">
         gvjfut
         <activity
-            android:name=".LoginActivity"
+            android:name=".activity.LoginActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,31 +27,27 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SummaryList"
+            android:name=".fragment.SummaryListFragment"
             android:label="@string/title_activity_summary_list"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".Home"
+            android:name=".activity.HomeActivity"
             android:label="@string/title_activity_home"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".AddExpenseActivity"
+            android:name=".activity.AddExpenseActivity"
             android:label="@string/title_activity_add_expense"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ShoppingListActivity"
+            android:name=".activity.ShoppingListActivity"
             android:label="@string/title_activity_shopping_list"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".SetBudgetActivity"
+            android:name=".activity.SetBudgetActivity"
             android:label="@string/title_activity_set_budget"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".SetAlertActivity"
-            android:label="@string/title_activity_set_alert"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".PlotsActivity"
+            android:name=".activity.PlotsActivity"
             android:label="@string/title_activity_plots"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>

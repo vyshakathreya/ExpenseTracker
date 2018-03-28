@@ -1,4 +1,4 @@
-package edu.sdsu.vyshak.personalexpensetracker;
+package edu.sdsu.vyshak.personalexpensetracker.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -16,8 +16,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import edu.sdsu.vyshak.personalexpensetracker.bean.Expenses;
+import edu.sdsu.vyshak.personalexpensetracker.R;
+
 /**
- * Created by vysha on 4/17/2017.
+ * Created by Vyshak on 4/17/2017.
  */
 
 public class CustomSummaryAdapter extends ArrayAdapter<Expenses> {
@@ -44,8 +47,6 @@ private static class ViewHolder {
 
     }
 
-
-
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder = new ViewHolder();
@@ -63,8 +64,6 @@ private static class ViewHolder {
         Date startDate;
 
 
-        //SimpleDateFormat df2 = new SimpleDateFormat("MM/dd/yyyy");
-            //String dateText = df2.format(expenses.getDate());
         viewHolder.txtDate.setText(expenses.getDate());
         if(expenses.getTranstype().equals("Expense")) {
             viewHolder.txtCrDb.setTextColor(Color.RED);

@@ -1,30 +1,28 @@
-package edu.sdsu.vyshak.personalexpensetracker;
+package edu.sdsu.vyshak.personalexpensetracker.data;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
-import com.google.firebase.database.DatabaseReference;
-
-import java.sql.Array;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
+
+import edu.sdsu.vyshak.personalexpensetracker.bean.Display;
+import edu.sdsu.vyshak.personalexpensetracker.bean.Expenses;
+import edu.sdsu.vyshak.personalexpensetracker.bean.ShopItems;
+import edu.sdsu.vyshak.personalexpensetracker.bean.Budget;
+import edu.sdsu.vyshak.personalexpensetracker.bean.UserAlerts;
 
 /**
- * Created by vysha on 3/31/2017.
+ * This class handles all the database connections.
+ * Created by Vyshak on 3/31/2017.
  */
 
 public class DBHelper extends SQLiteOpenHelper {
-    private static final String DATABASE_NAME = "name.db";
+    private static final String DATABASE_NAME = "personalExpenseTracker.db";
     private static final int DATABASE_VERSION = 1;
 
-    private static final String ACCOUNTS_TABLE = "accounts";
     private static final String ACCOUNTS_COLUMN_ACCOUNT_NAME = "accountNickname";
     private static final String ACCOUNTS_COLUMN_ACCOUNT_TYPE = "accountType";
     private static final String ACCOUNTS_COLUMN_ACCOUNT_USER = "uid";
@@ -62,7 +60,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
@@ -75,7 +72,6 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(ACCOUNTS_COLUMN_ACCOUNT_NAME, accountNickname);
         contentValues.put(ACCOUNTS_COLUMN_ACCOUNT_TYPE, accountType);
         contentValues.put(ACCOUNTS_COLUMN_DISPLAY_NAME, displayName);
-        db.insert("accounts", null, contentValues);
         return true;
     }
 
@@ -89,13 +85,12 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery(query, null);
         res.moveToFirst();
-        while(res.isAfterLast() == false) {
+        while(!res.isAfterLast()) {
             array_list.add(res.getString(res.getColumnIndex("displayAccount")));
             res.moveToNext();
         }
         res.close();
         return array_list;
-
     }
 
     public void insertTransaction(String userID, String account,float amount, String currency, String transtype, String category, String date, String desc) {
@@ -127,8 +122,7 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery(query, null);
         res.moveToFirst();
-        while (res.isAfterLast() == false) { //account text, amount int,currency text" +
-            //"transactionType text, category text, date text, description text
+        while (!res.isAfterLast()) {
             Expenses expenses = new Expenses();
             expenses.setAccount(res.getString(res.getColumnIndex(EXPENSES_COLUMN_ACCOUNT)));
             expenses.setAmount(res.getFloat(res.getColumnIndex(EXPENSES_COLUMN_AMOUNT)));
@@ -146,11 +140,8 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public void removeAccount(String toRemove, String user) {
-        //uid INTEGER NOT NULL, accountNickname text, accountType text, displayAccount text PRIMARY KEY
         SQLiteDatabase db = this.getReadableDatabase();
-        Log.d(TAG,"removing account"+toRemove+user );
         db.execSQL("Delete FROM accounts where displayAccount like"+"\'"+toRemove+"\'" + "and uid like "+"\'"+user+"\'");
-        Log.d(TAG,getAllAccounts(user).toString());
     }
 
     public void removeTransaction(String query) {
@@ -158,40 +149,30 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(query);
     }
 
+    /*
+    * Gives the overall balance at any point of time
+    * */
     public float totalBalance(String user){
         SQLiteDatabase dbw = getWritableDatabase();
         dbw.execSQL("CREATE TABLE IF NOT EXISTS transactionsSummary" +
                         "(transaction_id INTEGER PRIMARY KEY AUTOINCREMENT, uid text, account text, amount real,currency text," +
                         "transactionType text, category text, date date, description text)");
+
+        //Compute Income
         String query = "select sum(amount) from transactionsSummary where uid like"+"\'"+user+"\'"+"and transactionType like" +"\'"+"Income"+"\'";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(query, null);
         cursor.moveToFirst();
         float countIncome = cursor.getFloat(0);
-        Log.d("DBincome",String.valueOf(countIncome));// getInt(cursor.getColumnIndex(EXPENSES_COLUMN_AMOUNT));
-        cursor.close();
-        String queryExpense = "select sum(amount) from transactionsSummary where uid like"+"\'"+user+"\'"+"and transactionType like" +"\'"+"Expense"+"\'";
-        cursor = db.rawQuery(queryExpense, null);
-        cursor.moveToFirst();
-        float countExpense = cursor.getFloat(0); //getCount();
-        Log.d("DBexpense",String.valueOf(countExpense));// getInt(cursor.getColumnIndex(EXPENSES_COLUMN_AMOUNT));
-        cursor.close();
-        return countIncome-countExpense;
-    }
 
-    public int expensePerCategory(String user){
-        String query = "select sum(amount) from transactionsSummary where uid like"+"\'"+user+"\'"+"and transactionType like" +"\'"+"Income"+"\'";
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(query, null);
-        cursor.moveToFirst();
-        int countIncome = cursor.getInt(0);
-        Log.d("DBincome",String.valueOf(countIncome));// getInt(cursor.getColumnIndex(EXPENSES_COLUMN_AMOUNT));
         cursor.close();
+
+        //Compute Expense
         String queryExpense = "select sum(amount) from transactionsSummary where uid like"+"\'"+user+"\'"+"and transactionType like" +"\'"+"Expense"+"\'";
         cursor = db.rawQuery(queryExpense, null);
         cursor.moveToFirst();
-        int countExpense = cursor.getInt(0); //getCount();
-        Log.d("DBexpense",String.valueOf(countExpense));// getInt(cursor.getColumnIndex(EXPENSES_COLUMN_AMOUNT));
+        float countExpense = cursor.getFloat(0);
+
         cursor.close();
         return countIncome-countExpense;
     }
@@ -211,7 +192,7 @@ public class DBHelper extends SQLiteOpenHelper {
         String query="SELECT * FROM shoppingItems";
         Cursor res = db.rawQuery(query, null);
         res.moveToFirst();
-        while (res.isAfterLast() == false) {
+        while (!res.isAfterLast()) {
             ShopItems shopItems = new ShopItems();
             shopItems.setItemName(res.getString(res.getColumnIndex("item")));
             array_list.add(shopItems);
@@ -221,11 +202,8 @@ public class DBHelper extends SQLiteOpenHelper {
         return array_list;
     }
 
-
     public void removeShoppingList(String shopItems) {
-
         String query = "Delete FROM shoppingItems where item like"+"\'"+shopItems+"\'";
-        Log.d(TAG,query);
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL(query);
     }
@@ -233,7 +211,6 @@ public class DBHelper extends SQLiteOpenHelper {
     public void storeUsers(String name, String email, String currency, String phone) {
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL("CREATE TABLE IF NOT EXISTS userTable(name text , email text primary key, phone text, currency text)");
-        Log.d(TAG,name+email+currency);
         ContentValues contentValues = new ContentValues();
         contentValues.put("name",name);
         contentValues.put("email",email);
@@ -248,16 +225,15 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE IF NOT EXISTS userTable(name text , email text primary key, phone text, currency text)");
         Cursor cursor = db.rawQuery(query, null);
         cursor.moveToFirst();
-        if(cursor == null || !cursor.moveToFirst() )
+        if( !cursor.moveToFirst() )
             return null;
         String countExpense = cursor.getString(0); //getCount();
-        Log.d("DBexpense",String.valueOf(countExpense));// getInt(cursor.getColumnIndex(EXPENSES_COLUMN_AMOUNT));
         cursor.close();
         return countExpense;
     }
 
-    public ArrayList<Disp> getAllUserAccounts(String uid) {
-        ArrayList<Disp> array_list = new ArrayList<>();
+    public ArrayList<Display> getAllUserAccounts(String uid) {
+        ArrayList<Display> array_list = new ArrayList<>();
         SQLiteDatabase dbw = getWritableDatabase();
         dbw.execSQL("CREATE TABLE IF NOT EXISTS accounts" +
                 "(uid INTEGER NOT NULL, accountNickname text, accountType text, displayAccount text PRIMARY KEY)"
@@ -267,7 +243,7 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor res = db.rawQuery(query, null);
         res.moveToFirst();
         while(!res.isAfterLast()) {
-            Disp disp = new Disp();
+            Display disp = new Display();
             disp.setDisplayname(res.getString(0));
             array_list.add(disp);
             res.moveToNext();
@@ -276,7 +252,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return array_list;
     }
 
-    public void savelimits(String chosenBudgetCategory, float amountLimit, String limitCycle) {
+    public void saveBudgetLimits(String chosenBudgetCategory, float amountLimit, String limitCycle) {
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL("CREATE TABLE IF NOT EXISTS budget" +
                 "(category text PRIMARY KEY, amountlimit real, limitcycle text)"
@@ -298,7 +274,7 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery(query, null);
         res.moveToFirst();
-        while (res.isAfterLast() == false) {
+        while (!res.isAfterLast()) {
             Budget budget = new Budget();
             budget.setCategory(res.getString(res.getColumnIndex("category")));
             budget.setAmount(res.getDouble(res.getColumnIndex("amountlimit")));
@@ -311,48 +287,30 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public void removeBudget(String shopItems) {
-
         String query = "Delete FROM budget where category like"+"\'"+shopItems+"\'";
-        Log.d(TAG,query);
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL(query);
     }
 
-    public double getexpense(String budget, String fromdate) {
-        Date date = new Date();
-        Calendar calendar = Calendar.getInstance();
-
-        String query = "Select sum(amount) from transactionsSummary where transactionType like 'Expense' and date > "+ fromdate+" and category like "+"\'"+ budget+"%\'";
-        Log.d("expense from to ",query);
+    public double getExpenseForCategory(String category, String fromdate) {
+        String query = "Select sum(amount) from transactionsSummary where transactionType like 'Expense' and date > "+ fromdate+" and category like "+"\'"+ category+"%\'";
         SQLiteDatabase db = getReadableDatabase();
         Cursor res = db.rawQuery(query, null);
         res.moveToFirst();
-        double ans=res.getDouble(0);
+        double expenseCategory=res.getDouble(0);
         res.close();
-        return  ans;
+        return expenseCategory;
     }
 
-    public void setAlerts(String duedate, String duebill, String repeatCycle) {
-        SQLiteDatabase db = getWritableDatabase();
-        db.execSQL("CREATE TABLE IF NOT EXISTS alertsTbl(duedate date, duebill text primary key, repeatCycle text)");
-        Log.d(TAG,duebill+duedate+repeatCycle);
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("duedate",duedate);
-        contentValues.put("duebill",duebill);
-        contentValues.put("repeatCycle",repeatCycle);
-        db.insert("alertsTbl", null, contentValues);
-    }
-
-    public ArrayList<UserAlerts> getAlerts( String fromdate) {
+    public ArrayList<UserAlerts> getAlerts(String fromdate) {
         SQLiteDatabase dbw = getWritableDatabase();
         dbw.execSQL("CREATE TABLE IF NOT EXISTS alertsTbl(duedate date, duebill text primary key, repeatCycle text)");
         ArrayList<UserAlerts> array_list = new ArrayList<>();
         String query = "Select * from alertsTbl where duedate > "+ fromdate;
-        Log.d("expense from to ",query);
         SQLiteDatabase db = getReadableDatabase();
         Cursor res = db.rawQuery(query, null);
         res.moveToFirst();
-        while (res.isAfterLast() == false) { //account text, amount int,currency text" +
+        while (!res.isAfterLast()) {
             UserAlerts userAlerts = new UserAlerts();
             userAlerts.setDuebill(res.getString(res.getColumnIndex("duebill")));
             userAlerts.setDuedate(res.getString(res.getColumnIndex("duedate")));
@@ -362,6 +320,5 @@ public class DBHelper extends SQLiteOpenHelper {
         res.close();
         return array_list;
     }
-
 
 }

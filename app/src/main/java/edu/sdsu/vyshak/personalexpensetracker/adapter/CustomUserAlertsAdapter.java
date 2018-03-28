@@ -1,4 +1,4 @@
-package edu.sdsu.vyshak.personalexpensetracker;
+package edu.sdsu.vyshak.personalexpensetracker.adapter;
 
 import android.content.Context;
 import android.graphics.Paint;
@@ -12,36 +12,22 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import edu.sdsu.vyshak.personalexpensetracker.bean.UserAlerts;
+import edu.sdsu.vyshak.personalexpensetracker.data.DBHelper;
+import edu.sdsu.vyshak.personalexpensetracker.R;
+
 /**
- * Created by vysha on 5/12/2017.
+ * Created by Vyshak on 5/12/2017.
  */
 
-class CustomUserAlertsAdapter extends ArrayAdapter<UserAlerts> {
+public class CustomUserAlertsAdapter extends ArrayAdapter<UserAlerts> {
     private ArrayList<UserAlerts> dataSet;
-    Context mContext;
-
-
-    // View lookup cache
-    private static class ViewHolder {
-        TextView txtSender;
-        TextView txtMessageSender;
-        TextView txtReciever;
-        TextView txtMessageReciever;
-    }
+    private Context mContext;
 
     public CustomUserAlertsAdapter(ArrayList<UserAlerts> data, Context context) {
         super(context, R.layout.shoplist_custom, data);
         this.dataSet = data;
         this.mContext = context;
-
-    }
-
-    public ArrayList<UserAlerts> getData() {
-        return dataSet;
-    }
-
-    public void setDataSet(ArrayList<UserAlerts> dataSet) {
-        this.dataSet.addAll(dataSet);
     }
 
     @Override
@@ -55,8 +41,8 @@ class CustomUserAlertsAdapter extends ArrayAdapter<UserAlerts> {
         final TextView itemToBePurchased = (TextView) rowView.findViewById(R.id.alertmessage);
         itemToBePurchased.setText(shopItems.getDuebill());
 
-        final TextView itemdate = (TextView) rowView.findViewById(R.id.alertdate);
-        itemdate.setText(shopItems.getDuedate());
+        final TextView itemDate = (TextView) rowView.findViewById(R.id.alertdate);
+        itemDate.setText(shopItems.getDuedate());
 
         donePending.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,7 +58,7 @@ class CustomUserAlertsAdapter extends ArrayAdapter<UserAlerts> {
         doneAlert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getData().remove(shopItems);
+                dataSet.remove(shopItems);
                 DBHelper dbHelper = new DBHelper(getContext());
                 dbHelper.removeShoppingList(shopItems.getDuebill());
                 notifyDataSetChanged();

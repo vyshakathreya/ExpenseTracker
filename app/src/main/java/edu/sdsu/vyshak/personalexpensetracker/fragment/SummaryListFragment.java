@@ -1,10 +1,8 @@
-package edu.sdsu.vyshak.personalexpensetracker;
+package edu.sdsu.vyshak.personalexpensetracker.fragment;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -19,12 +17,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,11 +27,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
-import java.util.Date;
 
-import static edu.sdsu.vyshak.personalexpensetracker.R.string.date;
+import edu.sdsu.vyshak.personalexpensetracker.R;
+import edu.sdsu.vyshak.personalexpensetracker.adapter.CustomSummaryAdapter;
+import edu.sdsu.vyshak.personalexpensetracker.bean.Expenses;
+import edu.sdsu.vyshak.personalexpensetracker.data.DBHelper;
 
-public class SummaryList extends AppCompatActivity {
+public class SummaryListFragment extends AppCompatActivity {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -83,6 +79,7 @@ public class SummaryList extends AppCompatActivity {
                 }
             }
         };
+
         user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
         } else {
@@ -105,10 +102,8 @@ public class SummaryList extends AppCompatActivity {
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
+        //The fragment argument representing the section number for this fragment.
+
         private static final String ARG_SECTION_NUMBER = "section_number";
         private static final String ARG_SUMMARY_LIST = "summary_list";
 
@@ -138,7 +133,7 @@ public class SummaryList extends AppCompatActivity {
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_summary_list, container, false);
             dbHelper = new DBHelper(getContext());
-            expenseArray = new ArrayList<>();
+            expenseArray = new ArrayList<Expenses>();
             expenseArray.addAll(dbHelper.gettransactions(getArguments().getString(ARG_SUMMARY_LIST)));
             customSummaryAdapter = new CustomSummaryAdapter(expenseArray, getContext());
             ListView accountSummary = (ListView) rootView.findViewById(R.id.accountSummary);

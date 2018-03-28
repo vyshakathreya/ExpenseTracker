@@ -15,4 +15,4 @@ home currency. Balance is displayed in both home currency as well as in the defa
 4. Balance updates in USD as well as chosen currency.
 
 api used to get currency conversion rates: http://fixer.io/
-external library used for graph from android-graphview.org
+external library used for graph from android-graphview.org. The graph is just a placeholder and is considered as a feature enhancement.

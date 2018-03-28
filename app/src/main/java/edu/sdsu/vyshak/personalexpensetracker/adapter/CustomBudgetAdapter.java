@@ -1,22 +1,24 @@
-package edu.sdsu.vyshak.personalexpensetracker;
+package edu.sdsu.vyshak.personalexpensetracker.adapter;
 
 import android.content.Context;
-import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import edu.sdsu.vyshak.personalexpensetracker.data.DBHelper;
+import edu.sdsu.vyshak.personalexpensetracker.R;
+import edu.sdsu.vyshak.personalexpensetracker.bean.Budget;
+
 /**
- * Created by vysha on 5/9/2017.
+ * Created by Vyshak on 5/9/2017.
  */
 
-class CustomBudgetAdapter extends ArrayAdapter<Budget> {
+public class CustomBudgetAdapter extends ArrayAdapter<Budget> {
 
 
     private ArrayList<Budget> dataSet;

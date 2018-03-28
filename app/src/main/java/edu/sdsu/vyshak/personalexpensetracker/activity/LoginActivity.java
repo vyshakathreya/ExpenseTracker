@@ -1,4 +1,4 @@
-package edu.sdsu.vyshak.personalexpensetracker;
+package edu.sdsu.vyshak.personalexpensetracker.activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -6,36 +6,18 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.app.LoaderManager.LoaderCallbacks;
-
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.text.InputType;
 import android.text.TextUtils;
-import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -47,21 +29,19 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static android.Manifest.permission.READ_CONTACTS;
+import edu.sdsu.vyshak.personalexpensetracker.fragment.FormFragment;
+import edu.sdsu.vyshak.personalexpensetracker.R;
 
 /**
+ *
  * A login screen that offers login via email/password.
  */
+
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener  {
     private static final String TAG = "Login Activity";
     private TextView statusTextView;
     private EditText emailField;
     private EditText passwordField;
-    private CheckBox rememberCheck;
-    private CheckBox showpasswordCheck;
     private View progressView;
     private View loginFormView;
     public static String PREFS_NAME="mypre";
@@ -97,12 +77,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                     if (user != null) {
-                    Intent intent = new Intent(LoginActivity.this,Home.class);
+                    Intent intent = new Intent(LoginActivity.this,HomeActivity.class);
                     startActivity(intent);
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     updateUI(user);
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
             }
         };
@@ -111,11 +89,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     .edit()
                     .putString(PREF_USERNAME,emailField.getText().toString())
                     .putString(PREF_PASSWORD,passwordField.getText().toString())
-                    .commit();
-            Log.d(TAG,"saving data");
-
+                    .apply();
     }
 
+    /*
+    * Ensure user is logged in when the application comes from background
+    * */
     @Override
     public void onStart() {
         super.onStart();
@@ -130,14 +109,21 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    /**
+     * Transitions to a account creation form.
+     *
+     */
     private void createAccount() {
-        Log.d(TAG, "createAccount: putting fragment" );
         FragmentManager fragments = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragments.beginTransaction();
         fragmentTransaction.replace(R.id.content, fragmentForm);
         fragmentTransaction.commit();
     }
 
+    /**
+     * Sign in is based on Email-password authentication in the firebase.
+     *Form is validated before submission. Internet availabiltiy is checked before proceeding.
+     */
     private void signIn(String email, String password) {
         Log.d(TAG, "signIn:" + email);
         if (!validateForm()) {
@@ -149,9 +135,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
                         if(task.isSuccessful()){
-                            Intent intent = new Intent(LoginActivity.this,Home.class);
+                            Intent intent = new Intent(LoginActivity.this,HomeActivity.class);
                             startActivity(intent);
                             showProgress(false);
                         }
@@ -177,6 +162,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 });
     }
 
+    /**
+     * Ensuring form is not empty saves from null pointers.
+     *
+     */
     private boolean validateForm() {
         boolean valid = true;
 
@@ -198,6 +187,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         return valid;
     }
 
+    /**
+     * Initialize the status text view.
+     *
+     */
     private void updateUI(FirebaseUser user) {
 
         statusTextView.setText(R.string.signed_out);
@@ -205,6 +198,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
+
+    /**
+     *Check for network access
+     *
+     * @return boolean true if the network is available, false otherwise.
+     *
+     */
     public boolean haveNetworkAccess() {
         Log.d(TAG,"checking network");
         ConnectivityManager connMgr = (ConnectivityManager)
@@ -216,27 +216,32 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         return true;
     }
 
+    /**
+     * Store only the user name
+     *Modified to use apply instead of commit for the shared preferences
+     * Apply runs in the background instead of running immediately.
+     */
     @Override
     public void onClick(View v) {
         int i = v.getId();
         if (i == R.id.email_create_account_button) {
             createAccount();
         } else if (i == R.id.email_sign_in_button) {
-            //if(rememberCheck.isChecked()){
                 getSharedPreferences(PREFS_NAME,MODE_PRIVATE)
                         .edit()
                         .putString(PREF_USERNAME,emailField.getText().toString())
                         .putString(PREF_PASSWORD,passwordField.getText().toString())
-                        .commit();
-                Log.d(TAG,"saving data");
-            //}
+                        .apply();
             signIn(emailField.getText().toString(), passwordField.getText().toString());
         }
     }
 
     /**
      * Shows the progress UI and hides the login form.
+     * Only for Api higher than honeycomb.
+     *
      */
+
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
@@ -260,6 +265,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 }
             });
         } else {
+
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
             progressView.setVisibility(show ? View.VISIBLE : View.GONE);

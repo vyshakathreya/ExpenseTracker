@@ -1,21 +1,20 @@
-package edu.sdsu.vyshak.personalexpensetracker;
-
-import android.os.Parcelable;
+package edu.sdsu.vyshak.personalexpensetracker.bean;
 
 /**
- * Created by vysha on 5/3/2017.
+ * Created by Vyshak on 5/3/2017.
+ * This class monitors all the paraments related to user expenses
  */
 
-class Expenses  {
-    String account;
-    String userId;
-    float amount;
-    String currency;
-    String transtype;
-    String category;
-    String date;
-    String desc;
-    String time;
+public class Expenses  {
+    private String account;
+    private String userId;
+    private float amount;
+    private String currency;
+    private String transtype;
+    private String category;
+    private String date;
+    private String desc;
+    private String time;
 
     public String getUserId() {
         return userId;
@@ -24,8 +23,6 @@ class Expenses  {
     public void setUserId(String userId) {
         this.userId = userId;
     }
-
-
 
     public String getAccount() {
         return account;
@@ -86,6 +83,7 @@ class Expenses  {
     public void setTime(String time) {
         this.time = time;
     }
+
     public String getTime(){
         return time;
     }

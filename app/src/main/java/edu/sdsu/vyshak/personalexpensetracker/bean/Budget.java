@@ -1,13 +1,14 @@
-package edu.sdsu.vyshak.personalexpensetracker;
+package edu.sdsu.vyshak.personalexpensetracker.bean;
 
 /**
- * Created by vysha on 5/9/2017.
+ * Created by Vyshak on 5/9/2017.
+ * This class hosts budget parameters.
  */
 
-class Budget {
-    String category;
-    Double amount;
-    String cycle;
+public class Budget {
+    private String category;
+    private Double amount;
+    private String cycle;
 
     public String getCategory() {
         return category;

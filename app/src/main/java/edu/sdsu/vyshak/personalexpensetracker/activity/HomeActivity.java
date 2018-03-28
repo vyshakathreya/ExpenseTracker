@@ -1,4 +1,4 @@
-package edu.sdsu.vyshak.personalexpensetracker;
+package edu.sdsu.vyshak.personalexpensetracker.activity;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -17,11 +17,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -38,11 +36,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
-
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,16 +44,31 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import edu.sdsu.vyshak.personalexpensetracker.R;
+import edu.sdsu.vyshak.personalexpensetracker.bean.UserAlerts;
+import edu.sdsu.vyshak.personalexpensetracker.fragment.SummaryListFragment;
+import edu.sdsu.vyshak.personalexpensetracker.bean.User;
+import edu.sdsu.vyshak.personalexpensetracker.sync.VolleyQueue;
+import edu.sdsu.vyshak.personalexpensetracker.adapter.CustomAccountsAdapter;
+import edu.sdsu.vyshak.personalexpensetracker.adapter.CustomUserAlertsAdapter;
+import edu.sdsu.vyshak.personalexpensetracker.bean.Accounts;
+import edu.sdsu.vyshak.personalexpensetracker.bean.Display;
+import edu.sdsu.vyshak.personalexpensetracker.bean.Expenses;
+import edu.sdsu.vyshak.personalexpensetracker.data.DBHelper;
 
+/**
+ * Created by Vyshak on 5/9/2017.
+ * This class controls the operations on the home screen.
+ *
+ */
 
-public class Home extends AppCompatActivity
+public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private TextView userEmail;
@@ -77,25 +85,22 @@ public class Home extends AppCompatActivity
     private Context context = this;
     public ArrayList<String> userAccounts = new ArrayList<>();
     private DBHelper mydb;
-    private GraphView graph;
-    private User currUser = new User();
     private CustomUserAlertsAdapter alertsAdapter;
     private ArrayList<UserAlerts> userAlertsArray;
+    private SimpleDateFormat formatter;
+    private double conversionValue;
+    private float balanceinaccount,convertedAmount;
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
     }
 
-    SimpleDateFormat formatter;
-    private List<String> categories = new ArrayList<String>();
-    private List<Expenses> allExpenses = new ArrayList<>();
-    private double conversionValue;
-    private float balanceinaccount,convertedAmount;
-    private LineGraphSeries<DataPoint> mSeries1;
-
-
-
+    /**
+     * OnCreate method initializes the canvas. Gets the currency conversion for the balance available.
+     * Sets the layout with buttons and slider.
+     *
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -145,7 +150,7 @@ public class Home extends AppCompatActivity
             loggedUser.setText("Hi, " + user.getDisplayName());
             userEmail.setText(user.getEmail());
             userAccounts.add("cash");
-            userAccounts.addAll(mydb.getAllAccounts(user.getUid().toString()));
+            userAccounts.addAll(mydb.getAllAccounts(user.getUid()));
         } else {
             loggedUser.setVisibility(View.INVISIBLE);
             auth.signOut();
@@ -156,10 +161,9 @@ public class Home extends AppCompatActivity
             userCurrency = mydb.getuserinfo("currency", user.getEmail());
             getCurrencyRate();
         }
-        Log.d(TAG,""+conversionValue);
         userAccounts.add("cash");
-        userAccounts.addAll(mydb.getAllAccounts(user.getUid().toString()));
-        setAccountCount(userAccounts.size());
+        userAccounts.addAll(mydb.getAllAccounts(user.getUid()));
+        accountCount = userAccounts.size() ;
 
         currencyValue = (TextView) findViewById(R.id.balanceinmycurrency);
         userCurrency = mydb.getuserinfo("currency", user.getEmail());
@@ -168,10 +172,8 @@ public class Home extends AppCompatActivity
         overallBalance = (TextView) findViewById(R.id.textView_balance);
         overallBalance.setText(String.valueOf(mydb.totalBalance(user.getUid())));
 
-
         today.set(Calendar.DAY_OF_MONTH,1);
         monthStart = String.valueOf(today.get(Calendar.YEAR) +"-"+ (today.get(Calendar.MONTH)+1) +"-"+ today.get(Calendar.DAY_OF_MONTH));
-
         ListView paymentslist = (ListView) findViewById(R.id.paymentlist);
 
         userAlertsArray = new ArrayList<>();
@@ -189,7 +191,7 @@ public class Home extends AppCompatActivity
         setAlerts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent alertIntent = new Intent(Home.this,SetBudgetActivity.class);
+                Intent alertIntent = new Intent(HomeActivity.this,SetBudgetActivity.class);
                 startActivity(alertIntent);
             }
         });
@@ -198,7 +200,7 @@ public class Home extends AppCompatActivity
         shoppingCartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent shoppingIntent = new Intent(Home.this,ShoppingListActivity.class);
+                Intent shoppingIntent = new Intent(HomeActivity.this,ShoppingListActivity.class);
                 startActivity(shoppingIntent);
             }
         });
@@ -207,7 +209,7 @@ public class Home extends AppCompatActivity
         incomeExpenseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent addExpenseIntent = new Intent(Home.this,AddExpenseActivity.class);
+                Intent addExpenseIntent = new Intent(HomeActivity.this,AddExpenseActivity.class);
                 startActivity(addExpenseIntent);
             }
         });
@@ -221,17 +223,17 @@ public class Home extends AppCompatActivity
         });
     }
 
+    /**
+     * Connects to the api fixer.io to get the conversion factors with base currency as USD
+     */
     public void getCurrencyRate(){
-        Log.d(TAG,"getting currency rate");
         Response.Listener<JSONObject> success_state = new Response.Listener<JSONObject>() {
             public void onResponse(JSONObject response) {
-                Log.d("getUsers"+userCurrency.substring(0,3),"response length"+response+userCurrency);
                 try {
                     JSONObject dataObj = response.getJSONObject("rates");
                     double convertAmount = (double) dataObj.get(userCurrency.substring(0,3));
-                    setConversionValue(convertAmount);
+                    conversionValue = convertAmount;
                     updateRate(convertAmount);
-                    Log.d(TAG,"conversion value"+String.valueOf(conversionValue));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -249,14 +251,18 @@ public class Home extends AppCompatActivity
 
     }
 
+    /**
+     *Uses the conversion factor to compute and update the UI
+     * @param convertAmount double valued conversion factor
+     *If home currency is not selected, disables the panel.
+     */
     private void updateRate(double convertAmount) {
 
         convertedAmount = (float) (convertAmount*balanceinaccount);
-        setConversionValue(convertAmount);
+        conversionValue= convertAmount;
         if (userCurrency != null) {
             currencyTextView.setText(userCurrency);
             currencyValue.setText(String.valueOf(convertedAmount));
-        Log.d("converted amount", String.valueOf(convertAmount));
         }
         else {
             currencyTextView.setVisibility(View.INVISIBLE);
@@ -264,6 +270,10 @@ public class Home extends AppCompatActivity
         }
     }
 
+    /**
+     * Reload the balances and graph upon coming back from the activity stack
+     *
+     */
     @Override
     protected void onRestart() {
         super.onRestart();
@@ -277,9 +287,7 @@ public class Home extends AppCompatActivity
             currencyTextView.setText(userCurrency);
             currencyValue.setText(String.valueOf(convertedAmount));
         }
-
     }
-
 
     @Override
     protected void onResume() {
@@ -293,14 +301,14 @@ public class Home extends AppCompatActivity
         if(userCurrency != null) {
             getCurrencyRate();
         }
-        Log.d(TAG+"resume",String.valueOf(balanceinaccount)+"tago"+ String.valueOf(conversionValue));
-
         currencyTextView.setText(userCurrency);
         currencyValue.setText(String.valueOf((float) (conversionValue*mydb.totalBalance(user.getUid()))));
-
-        Log.d("test","in resume");
     }
 
+    /**
+     * Close the slider window (drawer) upon clicking back button
+     *
+     */
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -311,12 +319,19 @@ public class Home extends AppCompatActivity
         }
     }
 
+    /**
+     * Populate the menu options in the drawer
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.home, menu);
         return true;
     }
 
+    /**
+     * Get the selected menu option to change the activity
+     *
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -328,6 +343,9 @@ public class Home extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     *Navigate to the chosen menu option
+     */
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -337,23 +355,19 @@ public class Home extends AppCompatActivity
             if(mydb.gettransactions("Select * from transactionsSummary where uid like "+"\'"+ user.getUid()+"\'").isEmpty()) {
                 Snackbar.make(getCurrentFocus(), "Please Add Transactions", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }else {
-                Intent addExpenseIntent = new Intent(Home.this, AddExpenseActivity.class);
+                Intent addExpenseIntent = new Intent(HomeActivity.this, AddExpenseActivity.class);
                 startActivity(addExpenseIntent);
             }
         }else if (id == R.id.nav_accountSummary) {
             if(mydb.gettransactions("Select * from transactionsSummary where uid like "+"\'"+ user.getUid()+"\'").isEmpty()) {
                 Snackbar.make(getCurrentFocus(), "Please Add Transactions", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }else{
-                Intent summaryIntent = new Intent(Home.this,SummaryList.class);
+                Intent summaryIntent = new Intent(HomeActivity.this,SummaryListFragment.class);
                 startActivity(summaryIntent);
             }
-
         }else if (id == R.id.shopList){
-            Intent shoppingIntent = new Intent(Home.this,ShoppingListActivity.class);
+            Intent shoppingIntent = new Intent(HomeActivity.this,ShoppingListActivity.class);
             startActivity(shoppingIntent);
-        }else if(id == R.id.alertMe){
-            Intent alertIntent = new Intent(Home.this,SetAlertActivity.class);
-            startActivity(alertIntent);
         }else if (id == R.id.logout){
             auth.signOut();
             finish();
@@ -365,15 +379,15 @@ public class Home extends AppCompatActivity
             if(!mydb.gettransactions("Select * from transactionsSummary where uid like "+"\'"+ user.getUid()+"\'").isEmpty()) {
                 Snackbar.make(getCurrentFocus(), "Updated !!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }else {
-                retriveData();
+                retrieveData();
             }
         }
         else if(id == R.id.setBudget){
-            Intent setBudgetIntent = new Intent(Home.this,SetBudgetActivity.class);
+            Intent setBudgetIntent = new Intent(HomeActivity.this,SetBudgetActivity.class);
             startActivity(setBudgetIntent);
         }
         else if(id == R.id.graphical){
-            Intent graphIntent = new Intent(Home.this,PlotsActivity.class);
+            Intent graphIntent = new Intent(HomeActivity.this,PlotsActivity.class);
             startActivity(graphIntent);
         }
 
@@ -382,7 +396,11 @@ public class Home extends AppCompatActivity
         return true;
     }
 
-    private void retriveData() {
+    /**
+     * Retrieve the data from the firebase
+     *
+     */
+    private void retrieveData() {
         DatabaseReference people = FirebaseDatabase.getInstance().getReference();
         people.child("accounts").getRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -390,12 +408,10 @@ public class Home extends AppCompatActivity
                 if (user.getDisplayName() != null) {
 
                     if (dataSnapshot.hasChild(user.getDisplayName())) {
-                        Log.d("rew", "listening");
                         FirebaseDatabase.getInstance().getReference().child("accounts").child(user.getDisplayName()).getRef().addChildEventListener(new ChildEventListener() {
                             @Override
                             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                                 Accounts chatMessage = dataSnapshot.getValue(Accounts.class);
-                                Log.d(TAG, "onchildAdded" + dataSnapshot.getChildrenCount() + chatMessage.getAccountName() + chatMessage.getAccountType());
                                 mydb.insertAccount(user.getUid(), chatMessage.getAccountName(), chatMessage.getAccountType(), chatMessage.getAccountName() + "-" + chatMessage.getAccountType());
                                 getCurrencyRate();
                             }
@@ -430,16 +446,12 @@ public class Home extends AppCompatActivity
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (String users : userAccounts) {
-                    Log.d(TAG, users);
                     if (dataSnapshot.hasChild(user.getUid() + "-" + users)) {
-                        Log.d("rew", "listening");
                         FirebaseDatabase.getInstance().getReference().child("IncomesExpense").child(user.getUid() + "-" + users).getRef()
                                 .addChildEventListener(new ChildEventListener() {
                                     @Override
                                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                                         Expenses chatMessage = dataSnapshot.getValue(Expenses.class);
-                                        Log.d(TAG, "onchildAddedexopence" + dataSnapshot.getChildrenCount() + chatMessage.getCurrency()
-                                                + chatMessage.getAmount() + chatMessage.getDate() + chatMessage.getTranstype() + chatMessage.getDesc());
                                         Date homeDate = new Date(chatMessage.getDate());
                                         mydb.insertTransaction(user.getUid(),chatMessage.getAccount(),chatMessage.getAmount(),chatMessage.getCurrency(),
                                                 chatMessage.getTranstype(),chatMessage.getCategory(), String.valueOf(homeDate),chatMessage.getDesc());
@@ -477,14 +489,18 @@ public class Home extends AppCompatActivity
         });
     }
 
+    /**
+     * Remove selected accounts from a list, displayed using a dialog
+     *
+     */
     private void manageAccounts() {
         final Dialog dialog = new Dialog(context);
         final String[] toremove = new String[1];
         dialog.setContentView(R.layout.content_manage_accounts);
         dialog.setTitle("Modify Accounts");
         final ListView listView = (ListView) dialog.findViewById(R.id.accounts_all_list);
-        final ArrayList<Disp> userAccountsDisplay= new ArrayList<>();
-        final Disp[] dispremove = new Disp[1];
+        final ArrayList<Display> userAccountsDisplay= new ArrayList<>();
+        final Display[] dispremove = new Display[1];
         userAccountsDisplay.addAll(mydb.getAllUserAccounts(user.getUid()));
         final CustomAccountsAdapter listAdapter = new CustomAccountsAdapter(userAccountsDisplay,this);
         listView.setAdapter(listAdapter);
@@ -493,7 +509,6 @@ public class Home extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 dispremove[0] = userAccountsDisplay.get(position);
                 toremove[0] = dispremove[0].getDisplayname();
-                Log.d(TAG,"to remove selected"+toremove[0]);
             }
         });
         Button dialogButtonOK = (Button) dialog.findViewById(R.id.account_remove_OK);
@@ -519,6 +534,11 @@ public class Home extends AppCompatActivity
 
     }
 
+    /**
+     * Create dialog fields to add a new account.
+     * For 2 fields creating a fragment is to spacious.
+     *
+     */
     private void addAccount() {
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.add_account);
@@ -544,7 +564,6 @@ public class Home extends AppCompatActivity
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 accountType= parent.getItemAtPosition(position).toString();
-                Log.d(TAG,"account Type" + accountType);
             }
 
             @Override
@@ -587,6 +606,10 @@ public class Home extends AppCompatActivity
         dialog.show();
     }
 
+    /**
+     * Involves updating the database from the server. Helps sync between same users on multiple devices.
+     *
+     */
     private void updateDB() {
         DatabaseReference people = FirebaseDatabase.getInstance().getReference();
 
@@ -598,16 +621,12 @@ public class Home extends AppCompatActivity
                             @Override
                             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                                 User chatMessage = dataSnapshot.getValue(User.class);
-                                Log.d(TAG, "onchildAddedexopence" + dataSnapshot.getChildrenCount() + chatMessage.getCurrency()
-                                        + chatMessage.getCurrency() + chatMessage.getEmail());
                                 mydb.storeUsers(chatMessage.getName(),chatMessage.getEmail(),chatMessage.getCurrency(),chatMessage.getPhone());
                             }
 
                             @Override
                             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                                 User chatMessage = dataSnapshot.getValue(User.class);
-                                Log.d(TAG, "onchildAddedexopence" + dataSnapshot.getChildrenCount() + chatMessage.getCurrency()
-                                        + chatMessage.getCurrency() + chatMessage.getEmail());
                                 mydb.storeUsers(chatMessage.getName(),chatMessage.getEmail(),chatMessage.getCurrency(),chatMessage.getPhone());
                             }
 
@@ -618,8 +637,6 @@ public class Home extends AppCompatActivity
                             @Override
                             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
                                 User chatMessage = dataSnapshot.getValue(User.class);
-                                Log.d(TAG, "onchildAddedexopence" + dataSnapshot.getChildrenCount() + chatMessage.getCurrency()
-                                        + chatMessage.getCurrency() + chatMessage.getEmail());
                                 mydb.storeUsers(chatMessage.getName(),chatMessage.getEmail(),chatMessage.getCurrency(),chatMessage.getPhone());
                             }
 
@@ -637,25 +654,14 @@ public class Home extends AppCompatActivity
         });
     }
 
+    /**
+     * Close the MySql connection before closing the app.
+     *
+     */
     @Override
     public void onDestroy(){
         super.onDestroy();
         mydb.close();
     }
 
-    public void setAccountCount(int accountCount) {
-        this.accountCount = accountCount;
-    }
-
-    public int getAccountCount() {
-        return accountCount;
-    }
-
-    public double getConversionValue() {
-        return conversionValue;
-    }
-
-    public void setConversionValue(double conversionValue) {
-        this.conversionValue = conversionValue;
-    }
 }

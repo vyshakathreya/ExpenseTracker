@@ -1,6 +1,5 @@
-package edu.sdsu.vyshak.personalexpensetracker;
+package edu.sdsu.vyshak.personalexpensetracker.sync;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 
 import com.android.volley.Request;
@@ -8,7 +7,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
 /**
- * Created by vysha on 4/25/2017.
+ * This class handles the HTTP requests.
+ * Created by Vyshak on 4/25/2017.
  */
 
 public class VolleyQueue {
@@ -31,8 +31,6 @@ public class VolleyQueue {
 
     public RequestQueue queue() {
         if (mRequestQueue == null) {
-            // getApplicationContext() is key, it keeps you from leaking the
-            // Activity or BroadcastReceiver if someone passes one in.
             mRequestQueue = Volley.newRequestQueue(mContext.getApplicationContext());
         }
         return mRequestQueue;

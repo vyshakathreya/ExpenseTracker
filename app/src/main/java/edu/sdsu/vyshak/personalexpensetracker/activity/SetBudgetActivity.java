@@ -1,4 +1,4 @@
-package edu.sdsu.vyshak.personalexpensetracker;
+package edu.sdsu.vyshak.personalexpensetracker.activity;
 
 
 import android.os.Bundle;
@@ -27,13 +27,24 @@ import java.util.Arrays;
 
 import java.util.List;
 
+import edu.sdsu.vyshak.personalexpensetracker.R;
+import edu.sdsu.vyshak.personalexpensetracker.adapter.CustomBudgetAdapter;
+import edu.sdsu.vyshak.personalexpensetracker.bean.Budget;
+import edu.sdsu.vyshak.personalexpensetracker.data.DBHelper;
+
+/**
+ * This class takes in the budget plans from the user.
+ * Creates a list of planned budgets.
+ *
+ */
+
 public class SetBudgetActivity extends AppCompatActivity {
 
-    String chosenBudgetCategory,limitCycle;
-    String TAG="Alert Activity";
-    DBHelper mydb;
-    float amountLimit=0;
-    final ArrayList<Budget> budgetArray = new ArrayList<>();
+    private String chosenBudgetCategory,limitCycle;
+    private String TAG="Alert Activity";
+    private DBHelper mydb;
+    private float amountLimit=0;
+    private final ArrayList<Budget> budgetArray = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +55,7 @@ public class SetBudgetActivity extends AppCompatActivity {
         final CustomBudgetAdapter customBudgetAdapter;
         mydb= new DBHelper(this);
         List<String> categories = new ArrayList<String>();
+
         try {
             InputStream budgetcategories = this.getAssets().open("budgetcategories");
             BufferedReader in = new BufferedReader( new InputStreamReader(budgetcategories));
@@ -67,6 +79,7 @@ public class SetBudgetActivity extends AppCompatActivity {
         chosenBudgetCategory=categories.get(0);
         billSpinner.setAdapter(billAdapter);
         billAdapter.notifyDataSetChanged();
+
         billSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -115,7 +128,7 @@ public class SetBudgetActivity extends AppCompatActivity {
                                 .setAction("Action", null).show();
                     }
                     amountLimit = Float.parseFloat(anount);
-                    mydb.savelimits(chosenBudgetCategory, amountLimit, limitCycle);
+                    mydb.saveBudgetLimits(chosenBudgetCategory, amountLimit, limitCycle);
                     budgetArray.clear();
                     budgetArray.addAll(mydb.getBudgetLimits());
                     customBudgetAdapter.notifyDataSetChanged();
@@ -132,40 +145,6 @@ public class SetBudgetActivity extends AppCompatActivity {
             }
         });
     }
-
-    /*private void addNotification() {
-        Log.d(TAG,"entering to notify");
-
-        for(Budget budget:budgetArray){
-            double checkexpense=mydb.getexpense(budget,date,date);
-            if((budget.getAmount()-checkexpense) <= 0.1*budget.getAmount()) {
-                addNotification();
-
-                NotificationCompat.Builder mBuilder =
-                        new NotificationCompat.Builder(this)
-                                .setSmallIcon(R.drawable.ic_notification)
-                                .setContentTitle("Exceding Budget!")
-                                .setContentText("You have spent 90% in " + budget.getCategory() + " category")
-                                .setOngoing(true);
-
-
-                Intent notificationIntent = new Intent(this, SetBudgetActivity.class);
-                TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-                stackBuilder.addParentStack(Home.class);
-
-                stackBuilder.addNextIntent(notificationIntent);
-                PendingIntent contentIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-               // PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(),STATUS_ICON_REQUEST_CODE,intent,0);
-                mBuilder.setContentIntent(contentIntent);
-
-                // Add as notification
-                NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                manager.notify(001, mBuilder.build());
-                finish();
-            }
-        }
-    }*/
-
 }
 
 

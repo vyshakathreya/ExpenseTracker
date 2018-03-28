@@ -1,4 +1,4 @@
-package edu.sdsu.vyshak.personalexpensetracker;
+package edu.sdsu.vyshak.personalexpensetracker.activity;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -20,7 +20,6 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -37,31 +36,56 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import edu.sdsu.vyshak.personalexpensetracker.bean.Budget;
+import edu.sdsu.vyshak.personalexpensetracker.data.DBHelper;
+import edu.sdsu.vyshak.personalexpensetracker.bean.Expenses;
+import edu.sdsu.vyshak.personalexpensetracker.R;
+import edu.sdsu.vyshak.personalexpensetracker.sync.VolleyQueue;
+
+/*
+* This class acts as a form for the user to log their expense.
+* Created by Vyshak on 4/19/2017.
+* */
+
 public class AddExpenseActivity extends AppCompatActivity {
-    String transactionType;
-    String spentDate;
-    String categoryChosen;
-    String currencyChosen;
-    String paymentChosen;
-    float expense;
-    String expenseInfo;
-    String TAG="AddExpenseActivity";
+    private String transactionType;
+    private String spentDate;
+    private String categoryChosen;
+    private String currencyChosen;
+    private String paymentChosen;
+    private String expenseInfo;
+    private String TAG="AddExpenseActivity";
+
+    private float expense;
+    private float toUSD;
+
+    private DBHelper mydb;
+    private FirebaseUser user;
+    private FirebaseAuth auth;
+    private DatabaseReference dbExpRef;
+
+    private ArrayList<String> categories;
+    private ArrayList<String> userAccounts;
+
     Date date = new Date();
-    ArrayList<String> categories,userAccounts;
-    DBHelper mydb;
-    FirebaseUser user;
-    FirebaseAuth auth;
-    DatabaseReference dbExpRef;
-    float toUSD;
-    private long startDate;
+
+    /**
+     * onCreate method to
+     * authenticate user,
+     * initiate buttons & adapters,
+     * read asset files,
+     * load data into pickers and
+     * activate event listeners
+     *
+     * @param savedInstanceState bundle
+     *
+     */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,19 +112,20 @@ public class AddExpenseActivity extends AppCompatActivity {
 
         categories = new ArrayList<>();
         userAccounts = new ArrayList<>();
-        userAccounts.add("cash");
+        userAccounts.add("Cash");
         userAccounts.addAll(mydb.getAllAccounts(user.getUid()));
+
         final EditText expenseDescription = (EditText) findViewById(R.id.expenseDesc);
         final EditText amountSpent = (EditText) findViewById(R.id.amountSpent);
 
-        ArrayList<String> incomeorExpense = new ArrayList<>(Arrays.asList("Income","Expense"));
-        ArrayAdapter<String> expenseIncomeAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,incomeorExpense);
+        final ArrayList<String> incomeOrExpenseList = new ArrayList<>(Arrays.asList("Income","Expense"));
+        ArrayAdapter<String> expenseIncomeAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,incomeOrExpenseList);
         expenseIncomeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        transactionType=incomeorExpense.get(0);
-        Log.d(TAG,"transaction type"+transactionType);
-        Spinner expenseIncome = (Spinner) findViewById(R.id.incomeExpense);
-        expenseIncome.setAdapter(expenseIncomeAdapter);
-        expenseIncome.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        transactionType=incomeOrExpenseList.get(0);
+
+        Spinner expenseIncomeSpinner = (Spinner) findViewById(R.id.incomeExpense);
+        expenseIncomeSpinner.setAdapter(expenseIncomeAdapter);
+        expenseIncomeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 transactionType=parent.getItemAtPosition(position).toString();
@@ -127,7 +152,6 @@ public class AddExpenseActivity extends AppCompatActivity {
                         spentDate= String.valueOf(year+"-"+(monthOfYear+1)+"-"+dayOfMonth);
                     }});
 
-        Log.d("entered date",spentDate);
         try {
             InputStream categoriesFile = getAssets().open("categories");
             BufferedReader in = new BufferedReader( new InputStreamReader(categoriesFile));
@@ -136,15 +160,15 @@ public class AddExpenseActivity extends AppCompatActivity {
                 categories.add(line);
             }
         } catch (IOException e) {
-            Log.e("rew", "read Error", e);
+            Log.e(TAG, "Categories read error", e);
         }
 
-        Spinner expenseType = (Spinner) findViewById(R.id.expenseType);
+        Spinner expenseTypeSpinner = (Spinner) findViewById(R.id.expenseType);
         final ArrayAdapter<String> expenseAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,categories);
         expenseAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categoryChosen=categories.get(0);
-        expenseType.setAdapter(expenseAdapter);
-        expenseType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        expenseTypeSpinner.setAdapter(expenseAdapter);
+        expenseTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 categoryChosen=parent.getItemAtPosition(position).toString();
@@ -166,18 +190,18 @@ public class AddExpenseActivity extends AppCompatActivity {
                 currencies.add(line);
             }
         } catch (IOException e) {
-            Log.e("rew", "read Error", e);
+            Log.e(TAG, "Currency types read error", e);
         }
 
         ArrayAdapter<String> currencyAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,currencies);
         currencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         currencyChosen=currencies.get(0);
+
         usedCurrency.setAdapter(currencyAdapter);
         usedCurrency.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 currencyChosen=parent.getItemAtPosition(position).toString();
-                Log.d(TAG,currencyChosen);
             }
 
             @Override
@@ -186,16 +210,16 @@ public class AddExpenseActivity extends AppCompatActivity {
             }
         });
 
-        Spinner modeofPayment = (Spinner) findViewById(R.id.usedAccount);
+        Spinner modeOfPaymentSpinner = (Spinner) findViewById(R.id.usedAccount);
         ArrayAdapter<String> accountUsedAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,userAccounts);
         accountUsedAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         paymentChosen=userAccounts.get(0);
-        modeofPayment.setAdapter(accountUsedAdapter);
-        modeofPayment.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+        modeOfPaymentSpinner.setAdapter(accountUsedAdapter);
+        modeOfPaymentSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 paymentChosen=parent.getItemAtPosition(position).toString();
-                Log.d(TAG,"modeofPayment"+paymentChosen);
             }
 
             @Override
@@ -215,33 +239,32 @@ public class AddExpenseActivity extends AppCompatActivity {
                     expense=Float.valueOf(amountSpent.getText().toString());
                     expenseInfo = expenseDescription.getText().toString();
                     if(!currencyChosen.equals("USD($)")){
-                        Log.d("not usd",""+ currencyChosen);
                         getCurrencyRate();
 
                     }else{
-                    Expenses expenses = new Expenses();
-                    expenses.setUserId(user.getUid());
-                    expenses.setAccount(paymentChosen);
-                    expenses.setAmount(expense);
-                    expenses.setCurrency(currencyChosen);
-                    expenses.setCategory(categoryChosen);
-                    expenses.setDesc(expenseInfo);
-                    expenses.setDate(spentDate);
-                    expenses.setTranstype(transactionType);
-                    expenses.setTime(String.valueOf(date.getTime()));
-                    Log.d("time",String.valueOf(expenses.getTime()));
-                    mydb.insertTransaction(user.getUid(), paymentChosen, expense, currencyChosen, transactionType, categoryChosen, spentDate, expenseInfo); //String account, String transtype, String category, String date
-                    dbExpRef = FirebaseDatabase.getInstance().getReference().child("IncomesExpense/").child(user.getUid() + "-" + paymentChosen);
-                    dbExpRef.child(expenses.getTime()).setValue(expenses);
-                    addNotification();
-                    Snackbar.make(getCurrentFocus(), "Expense Added Successfully", Snackbar.LENGTH_LONG)
-                              .setAction("Action", null).show();
-                    finish();
+                        Expenses expenses = new Expenses();
+                        expenses.setUserId(user.getUid());
+                        expenses.setAccount(paymentChosen);
+                        expenses.setAmount(expense);
+                        expenses.setCurrency(currencyChosen);
+                        expenses.setCategory(categoryChosen);
+                        expenses.setDesc(expenseInfo);
+                        expenses.setDate(spentDate);
+                        expenses.setTranstype(transactionType);
+                        expenses.setTime(String.valueOf(date.getTime()));
+                        mydb.insertTransaction(user.getUid(), paymentChosen, expense, currencyChosen, transactionType, categoryChosen, spentDate, expenseInfo); //String account, String transtype, String category, String date
+                        dbExpRef = FirebaseDatabase.getInstance().getReference().child("IncomesExpense/").child(user.getUid() + "-" + paymentChosen);
+                        dbExpRef.child(expenses.getTime()).setValue(expenses);
+                        addNotification();
+                        Snackbar.make(getCurrentFocus(), "Expense Added Successfully", Snackbar.LENGTH_LONG)
+                                  .setAction("Action", null).show();
+                        finish();
                 }}
 
 
             }
         });
+
         Button cancelNewAccount = (Button) findViewById(R.id.cancelAddExpenseButton);
         cancelNewAccount.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -252,8 +275,11 @@ public class AddExpenseActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * This method notifies user if the budget consumption is >60% or >90%
+     *
+     */
     private void addNotification() {
-        Log.d(TAG,"entering to notify");
         List<Budget> budgetArray = new ArrayList<>();
         budgetArray.addAll(mydb.getBudgetLimits());
         double checkexpense=0;
@@ -263,17 +289,16 @@ public class AddExpenseActivity extends AppCompatActivity {
             c.setTime(date);
             int dayOfWeek = c.get(Calendar.DAY_OF_WEEK) - c.getFirstDayOfWeek();
             c.add(Calendar.DAY_OF_MONTH, -dayOfWeek);
-            String weekStart = String.valueOf(c.get(c.YEAR)+"-"+(c.get(c.MONTH)+1)+"-"+c.get(c.DAY_OF_MONTH));
+            String weekStart = String.valueOf(c.get(Calendar.YEAR)+"-"+(c.get(Calendar.MONTH)+1)+"-"+c.get(Calendar.DAY_OF_MONTH));
             c.add(Calendar.DAY_OF_MONTH, 6);
-            String weekEnd = String.valueOf(c.get(c.YEAR)+"-"+(c.get(c.MONTH)+1)+"-"+c.get(c.DAY_OF_MONTH));
-            String monthStart = String.valueOf(c.get(c.YEAR)+"-"+(c.get(c.MONTH)+1)+"-"+c.getActualMinimum(c.DAY_OF_MONTH));
-            String monthEnd = String.valueOf(c.get(c.YEAR)+"-"+(c.get(c.MONTH)+1)+"-"+c.getActualMaximum(c.DAY_OF_MONTH));
+            String weekEnd = String.valueOf(c.get(Calendar.YEAR)+"-"+(c.get(Calendar.MONTH)+1)+"-"+c.get(Calendar.DAY_OF_MONTH));
+            String monthStart = String.valueOf(c.get(Calendar.YEAR)+"-"+(c.get(Calendar.MONTH)+1)+"-"+c.getActualMinimum(Calendar.DAY_OF_MONTH));
+            String monthEnd = String.valueOf(c.get(Calendar.YEAR)+"-"+(c.get(Calendar.MONTH)+1)+"-"+c.getActualMaximum(Calendar.DAY_OF_MONTH));
             if(budget.getCycle().equals("week")){
-                checkexpense=mydb.getexpense(budget.getCategory().toString(),weekStart);
+                checkexpense=mydb.getExpenseForCategory(budget.getCategory(),weekStart);
             }else
             {
-                checkexpense=mydb.getexpense(budget.getCategory().toString(),monthStart);
-                Log.d("checking","check expense month"+checkexpense);
+                checkexpense=mydb.getExpenseForCategory(budget.getCategory(),monthStart);
             }
             NotificationCompat.Builder mBuilder =
                     new NotificationCompat.Builder(this);
@@ -283,7 +308,7 @@ public class AddExpenseActivity extends AppCompatActivity {
                                 .setContentText("You have spent 90% in " + budget.getCategory() + " category");
                 Intent notificationIntent = new Intent(this, SetBudgetActivity.class);
                 TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-                stackBuilder.addParentStack(Home.class);
+                stackBuilder.addParentStack(HomeActivity.class);
 
                 stackBuilder.addNextIntent(notificationIntent);
                 PendingIntent contentIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -299,7 +324,7 @@ public class AddExpenseActivity extends AppCompatActivity {
                                 .setContentText("You have spent 60% in " + budget.getCategory() + " category");
                 Intent notificationIntent = new Intent(this, SetBudgetActivity.class);
                 TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-                stackBuilder.addParentStack(Home.class);
+                stackBuilder.addParentStack(HomeActivity.class);
 
                 stackBuilder.addNextIntent(notificationIntent);
                 PendingIntent contentIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -309,21 +334,21 @@ public class AddExpenseActivity extends AppCompatActivity {
                 manager.notify(001, mBuilder.build());
                 finish();
             }
-
-
         }
     }
 
+    /**
+     * This method is to get the currency conversion factors from the server.
+     *
+     */
+
     public void getCurrencyRate(){
-        Log.d(TAG,"getting currency rate");
         Response.Listener<JSONObject> success_state = new Response.Listener<JSONObject>() {
             public void onResponse(JSONObject response) {
-                Log.d("getUsers","response length"+response);
                 try {
                     JSONObject dataObj = response.getJSONObject("rates");
                     double convertAmount = (double) dataObj.get(currencyChosen.substring(0,3));
                     updateRate(convertAmount);
-                    Log.d(TAG,"conversion value"+String.valueOf(convertAmount));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -331,20 +356,23 @@ public class AddExpenseActivity extends AppCompatActivity {
         };
         Response.ErrorListener failure = new Response.ErrorListener() {
             public void onErrorResponse(VolleyError error) {
-                Log.d("statefail", error.toString());
-
-            }
+                Log.d(TAG, error.toString());
+                }
         };
         String url = "http://api.fixer.io/latest?base=USD";
         JsonObjectRequest getRequestState = new JsonObjectRequest(url,null,success_state,failure);//url, success_state, failure
         VolleyQueue.instance(this).add(getRequestState);
-
     }
 
+    /**
+     * This method updates the UI after multiplying with the rate conversion factor obtained from the server
+     *@param convertAmount rate of conversion value with double type.
+     */
+
     private void updateRate(double convertAmount) {
-            setToUSD( (float) convertAmount);
+        toUSD = (float) convertAmount;
         expense= Math.round((float) (expense/convertAmount));
-        Log.d("new expense", String.valueOf(expense));
+
         Expenses expenses = new Expenses();
         expenses.setUserId(user.getUid());
         expenses.setAccount(paymentChosen);
@@ -355,20 +383,14 @@ public class AddExpenseActivity extends AppCompatActivity {
         expenses.setDate(spentDate);
         expenses.setTranstype(transactionType);
         expenses.setTime(String.valueOf(date.getTime()));
-        Log.d("time",String.valueOf(expenses.getTime()));
+
         mydb.insertTransaction(user.getUid(), paymentChosen, expense, currencyChosen, transactionType, categoryChosen, spentDate, expenseInfo); //String account, String transtype, String category, String date
+
         dbExpRef = FirebaseDatabase.getInstance().getReference().child("IncomesExpense/").child(user.getUid() + "-" + paymentChosen);
         dbExpRef.child(expenses.getTime()).setValue(expenses);
+
         addNotification();
         finish();
-    }
-
-    public float getToUSD() {
-        return toUSD;
-    }
-
-    public void setToUSD(float toUSD) {
-        this.toUSD = toUSD;
     }
 
 }

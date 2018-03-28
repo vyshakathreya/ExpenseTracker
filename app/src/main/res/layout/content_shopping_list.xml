@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    tools:context="edu.sdsu.vyshak.personalexpensetracker.ShoppingListActivity">
+    tools:context="edu.sdsu.vyshak.personalexpensetracker.activity.ShoppingListActivity">
 
     <ListView
         android:id="@+id/shoptoBuyList"

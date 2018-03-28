@@ -1,4 +1,4 @@
-package edu.sdsu.vyshak.personalexpensetracker;
+package edu.sdsu.vyshak.personalexpensetracker.activity;
 
 import android.app.Dialog;
 import android.app.NotificationManager;
@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
@@ -16,7 +15,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -24,7 +22,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Response;
@@ -42,32 +39,40 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import edu.sdsu.vyshak.personalexpensetracker.R;
+import edu.sdsu.vyshak.personalexpensetracker.sync.VolleyQueue;
+import edu.sdsu.vyshak.personalexpensetracker.adapter.CustomShopAdapter;
+import edu.sdsu.vyshak.personalexpensetracker.bean.Budget;
+import edu.sdsu.vyshak.personalexpensetracker.bean.Expenses;
+import edu.sdsu.vyshak.personalexpensetracker.bean.ShopItems;
+import edu.sdsu.vyshak.personalexpensetracker.data.DBHelper;
+
+/*
+* This class controlls the shopping list.
+* Adding transaction from the shopping list.
+* Created by Vyshak on 5/28/2017.
+* */
 public class ShoppingListActivity extends AppCompatActivity {
 
-    String paymentChosen,currencyChosen,categoryChosen;
-    String TAG="Shopping List";
-    float shoppedPrice,toUSD;
-    DBHelper mydb;
-    FirebaseAuth auth;
-    FirebaseUser user;
-    FirebaseAuth.AuthStateListener authListener;
-    DatabaseReference dbref;
-    ArrayList<String> userAccounts = new ArrayList<>();
+    private String paymentChosen;
+    private String currencyChosen;
+    private String categoryChosen;
+    private String TAG="Shopping List";
+    private float shoppedPrice;
+    private float toUSD;
 
-    public float getToUSD() {
-        return toUSD;
-    }
+    private DBHelper mydb;
+    private FirebaseAuth auth;
+    private FirebaseUser user;
+    private FirebaseAuth.AuthStateListener authListener;
+    private DatabaseReference dbref;
 
-    public void setToUSD(float toUSD) {
-        this.toUSD = toUSD;
-    }
-
+    private ArrayList<String> userAccounts = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +114,10 @@ public class ShoppingListActivity extends AppCompatActivity {
         });
     }
 
+    /*
+    *
+    * Launch the form in a dialog for saving expenses.
+    * */
     private void launchSaveDialog(){
         final Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.save_shop_list);
@@ -185,6 +194,7 @@ public class ShoppingListActivity extends AppCompatActivity {
             Log.e("rew", "read Error", e);
         }
         categoryChosen=categories.get(0);
+
         final Spinner categorySpinner = (Spinner) dialog.findViewById(R.id.shoppingCategory);
         ArrayAdapter<String> categoryAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,categories);
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -200,51 +210,49 @@ public class ShoppingListActivity extends AppCompatActivity {
 
             }
         });
+
         final Button shopLogExpense= (Button) dialog.findViewById(R.id.Save_Expenses);
         shopLogExpense.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
                 shoppedPrice = Float.valueOf(shopExpense.getText().toString());
                 if(TextUtils.isEmpty(shopExpense.getText().toString())){
                     Toast.makeText(getApplicationContext(),"Please enter amount", Toast.LENGTH_LONG);
                 }else {
-                    if(!currencyChosen.equals("USD($)")){
-                        Log.d("not usd",""+ currencyChosen);
-                    getCurrencyRate();
-                    }else{
-                    Calendar today = Calendar.getInstance();
-                    String spentDate = String.valueOf(today.get(Calendar.YEAR)+today.get(Calendar.MONTH)+today.get(Calendar.DAY_OF_MONTH));
-                    Expenses expenses = new Expenses();
-                    expenses.setUserId(user.getUid());
-                    expenses.setAccount(paymentChosen);
-                    expenses.setAmount(shoppedPrice);
-                    expenses.setCurrency(currencyChosen);
-                    expenses.setCategory(categoryChosen);
-                    expenses.setDesc("shopping List");
-                    expenses.setDate(spentDate);
-                    expenses.setTranstype("Expense");
-                    mydb.insertTransaction(user.getUid(), paymentChosen, shoppedPrice, currencyChosen, "Expense", categoryChosen, spentDate, "shopping-"+categoryChosen); //String account, String transtype, String category, String date
-                    DatabaseReference dbExpRef = FirebaseDatabase.getInstance().getReference().child("IncomesExpense/").child(user.getUid() + "-" + paymentChosen);
-                    dbExpRef.child(spentDate).setValue(expenses);
-                    shopExpense.setText(" ");
-                    shopAccountUser.setSelection(0);
-                    shopCurrency.setSelection(0);
-                    categorySpinner.setSelection(0);
-                    dialog.dismiss();
-                        addNotification();
-                    Snackbar.make(v, "Data Saved Successfully", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
 
+                    if(!currencyChosen.equals("USD($)")){
+                        getCurrencyRate();
+                    }else{
+                        Calendar today = Calendar.getInstance();
+                        String spentDate = String.valueOf(today.get(Calendar.YEAR)+today.get(Calendar.MONTH)+today.get(Calendar.DAY_OF_MONTH));
+                        Expenses expenses = new Expenses();
+                        expenses.setUserId(user.getUid());
+                        expenses.setAccount(paymentChosen);
+                        expenses.setAmount(shoppedPrice);
+                        expenses.setCurrency(currencyChosen);
+                        expenses.setCategory(categoryChosen);
+                        expenses.setDesc("shopping List");
+                        expenses.setDate(spentDate);
+                        expenses.setTranstype("Expense");
+                        mydb.insertTransaction(user.getUid(), paymentChosen, shoppedPrice, currencyChosen, "Expense", categoryChosen, spentDate, "shopping-"+categoryChosen); //String account, String transtype, String category, String date
+                        DatabaseReference dbExpRef = FirebaseDatabase.getInstance().getReference().child("IncomesExpense/").child(user.getUid() + "-" + paymentChosen);
+                        dbExpRef.child(spentDate).setValue(expenses);
+                        shopExpense.setText(" ");
+                        shopAccountUser.setSelection(0);
+                        shopCurrency.setSelection(0);
+                        categorySpinner.setSelection(0);
+                        dialog.dismiss();
+                            addNotification();
+                        Snackbar.make(v, "Data Saved Successfully", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
                     }
                 }
-
             }
 
             private void getCurrencyRate() {
-                Log.d(TAG,"getting currency rate");
                 Response.Listener<JSONObject> success_state = new Response.Listener<JSONObject>() {
                     public void onResponse(JSONObject response) {
-                        Log.d("getUsers","response length"+response);
                         try {
                             JSONObject dataObj = response.getJSONObject("rates");
                             double convertAmount = (double) dataObj.get(currencyChosen.substring(0,3));
@@ -264,12 +272,11 @@ public class ShoppingListActivity extends AppCompatActivity {
                 String url = "http://api.fixer.io/latest?base=USD";
                 JsonObjectRequest getRequestState = new JsonObjectRequest(url,null,success_state,failure);//url, success_state, failure
                 VolleyQueue.instance(getApplicationContext()).add(getRequestState);
-
             }
 
 
             private void updateRate(double convertAmount) {
-                setToUSD( (float) convertAmount);
+                toUSD = (float) convertAmount;
                 shoppedPrice= (float) (shoppedPrice/convertAmount);
 
                 Calendar today = Calendar.getInstance();
@@ -295,16 +302,12 @@ public class ShoppingListActivity extends AppCompatActivity {
                 addNotification();
                 Snackbar.make(getCurrentFocus(), "Data Saved Successfully", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-
             }
-            }
-        );
+        });
         dialog.show();
-
     }
 
     private void addNotification() {
-        Log.d(TAG,"entering to notify");
         List<Budget> budgetArray = new ArrayList<>();
         budgetArray.addAll(mydb.getBudgetLimits());
         double checkexpense=0;
@@ -314,27 +317,29 @@ public class ShoppingListActivity extends AppCompatActivity {
             c.setTime(date);
             int dayOfWeek = c.get(Calendar.DAY_OF_WEEK) - c.getFirstDayOfWeek();
             c.add(Calendar.DAY_OF_MONTH, -dayOfWeek);
-            String weekStart = String.valueOf(c.get(c.YEAR)+"-"+(c.get(c.MONTH)+1)+"-"+c.get(c.DAY_OF_MONTH));
-            c.add(Calendar.DAY_OF_MONTH, 6);
-            String weekEnd = String.valueOf(c.get(c.YEAR)+"-"+(c.get(c.MONTH)+1)+"-"+c.get(c.DAY_OF_MONTH));
-            String monthStart = String.valueOf(c.get(c.YEAR)+"-"+(c.get(c.MONTH)+1)+"-"+c.getActualMinimum(c.DAY_OF_MONTH));
-            String monthEnd = String.valueOf(c.get(c.YEAR)+"-"+(c.get(c.MONTH)+1)+"-"+c.getActualMaximum(c.DAY_OF_MONTH));
+
+            String weekStart = String.valueOf(c.get(Calendar.YEAR)+"-"+(c.get(Calendar.MONTH)+1)+"-"+c.get(Calendar.DAY_OF_MONTH));
+            c.add(Calendar.DAY_OF_MONTH,6);
+
+            String monthStart = String.valueOf(c.get(Calendar.YEAR)+"-"+(c.get(Calendar.MONTH)+1)+"-"+c.getActualMinimum(Calendar.DAY_OF_MONTH));
+
             if(budget.getCycle().equals("week")){
-                checkexpense=mydb.getexpense(budget.getCategory().toString(),weekStart);
+                checkexpense=mydb.getExpenseForCategory(budget.getCategory(),weekStart);
             }else
             {
-                checkexpense=mydb.getexpense(budget.getCategory().toString(),monthStart);
-                Log.d("checking","check expense month"+checkexpense);
+                checkexpense=mydb.getExpenseForCategory(budget.getCategory(),monthStart);
             }
+
             NotificationCompat.Builder mBuilder =
                     new NotificationCompat.Builder(this);
-            if(budget.getCategory()==categoryChosen && (budget.getAmount() - checkexpense) <= 0.1*budget.getAmount()) {
+            if(budget.getCategory().equals(categoryChosen) && (budget.getAmount() - checkexpense) <= 0.1*budget.getAmount()) {
                 mBuilder.setSmallIcon(R.drawable.ic_notification)
                         .setContentTitle("Exceding Budget!")
                         .setContentText("You have spent 90% in " + budget.getCategory() + " category")
                         .setOngoing(true);
             }
-            if(budget.getCategory()==categoryChosen && (budget.getAmount() - checkexpense) <= 0.4*budget.getAmount()) {
+
+            if(budget.getCategory().equals(categoryChosen) && (budget.getAmount() - checkexpense) <= 0.4*budget.getAmount()) {
                 mBuilder.setSmallIcon(R.drawable.ic_notification)
                         .setContentTitle("Exceding Budget!")
                         .setContentText("You have spent 60% in " + budget.getCategory() + " category")
@@ -343,7 +348,7 @@ public class ShoppingListActivity extends AppCompatActivity {
             }
             Intent notificationIntent = new Intent(this, SetBudgetActivity.class);
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-            stackBuilder.addParentStack(Home.class);
+            stackBuilder.addParentStack(HomeActivity.class);
 
             stackBuilder.addNextIntent(notificationIntent);
             PendingIntent contentIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -352,7 +357,6 @@ public class ShoppingListActivity extends AppCompatActivity {
             NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             manager.notify(001, mBuilder.build());
             finish();
-
         }
     }
 
